@@ -40,6 +40,8 @@ backend/
   app/services/            비즈니스 로직: Firestore CRUD, 요약 계산, OpenAI 호출
   app/schemas/             Pydantic 요청·응답 모델 (검증 규칙)
   scripts/seed.py          CSV → Firestore 초기 데이터 입력
+  scripts/setup_env.py     서비스 계정 키 파일 → .env 생성 (base64 자동 변환)
+  scripts/check_setup.py   환경변수, Firestore, OpenAI 연결 점검
   tests/                   단위·API 테스트 (Firestore·OpenAI 대역 사용, 키 불필요)
   requirements.txt
   .env.example
@@ -132,19 +134,20 @@ pip install -r requirements.txt
 
 > `Activate.ps1` 실행이 막히면 먼저 `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`를 실행하세요. 현재 PowerShell 창에서만 적용됩니다.
 
-환경변수 파일을 만듭니다.
+`.env` 파일을 만듭니다. 키 파일 경로만 주면 base64 변환까지 스크립트가 대신 합니다. OpenAI 키와 모델 이름은 물어볼 때 입력하거나, 아직 없으면 Enter로 건너뛰세요.
 
 ```powershell
-Copy-Item .env.example .env
+python scripts\setup_env.py C:\keys\firebase-key.json
 ```
 
-서비스 계정 JSON을 base64 한 줄로 바꿔서 클립보드에 복사한 뒤, `.env`의 `FIREBASE_CREDENTIALS_BASE64=` 뒤에 붙여 넣습니다.
+> 직접 하려면 `Copy-Item .env.example .env`로 파일을 만든 뒤, `[Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\keys\firebase-key.json")) | Set-Clipboard`로 복사한 값을 `FIREBASE_CREDENTIALS_BASE64=` 뒤에 붙여 넣으면 됩니다. **`OPENAI_MODEL`은 기본값이 없으니 꼭 설정하세요.**
+
+연결을 점검합니다. 키 값은 화면에 나오지 않습니다.
 
 ```powershell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\경로\서비스계정키.json")) | Set-Clipboard
+python scripts\check_setup.py               # 환경변수, Firestore, OpenAI 모두
+python scripts\check_setup.py --skip-openai # OpenAI 키가 아직 없을 때
 ```
-
-`.env`에 `OPENAI_API_KEY`와 `OPENAI_MODEL`(사용할 모델 이름, 예: OpenAI 대시보드에서 쓸 수 있는 채팅 모델)도 채웁니다. **모델 기본값은 없으니 꼭 설정하세요.**
 
 초기 데이터를 넣고 서버를 실행합니다.
 
