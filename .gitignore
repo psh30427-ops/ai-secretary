@@ -16,3 +16,6 @@ __pycache__/
 # 프론트 빌드 결과
 frontend/dist/
 .vercel/
+
+# 잘못 받은 패키지 파일
+*.whl
