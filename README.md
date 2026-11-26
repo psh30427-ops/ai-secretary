@@ -24,7 +24,7 @@
 |---|---|
 | 백엔드 | Python 3.10+, FastAPI, Uvicorn, Pydantic v2 |
 | 데이터베이스 | Firebase Firestore (`firebase-admin`) |
-| AI | OpenAI Chat Completions API (`openai`) |
+| AI | OpenAI Chat Completions API (`openai`). 환경변수로 OpenAI 호환 API(제미나이) 전환 가능 |
 | 설정 | `python-dotenv` (환경변수) |
 | 프론트엔드 | 바닐라 HTML / CSS / JavaScript (프레임워크 없음) |
 | 배포 | Render (백엔드), Vercel (프론트엔드) |
@@ -183,6 +183,21 @@ python -m unittest discover -s tests -t .
 
 CSV에는 89건이 있습니다. 과제 요건(100건 이상)을 채우려면 화면의 **데이터 관리** 탭에서 `[신청]`, `[개인]` 일정을 11건 이상 추가하세요. 분류를 고르면 중요도 기본값이 자동으로 들어갑니다.
 
+### 제미나이로 실행하기 (선택)
+
+과제 기본은 OpenAI(GPT)입니다. 제미나이 API 결제가 있다면, 코드는 그대로 두고 환경변수만 바꿔 OpenAI 호환 주소로 제미나이를 쓸 수 있습니다. **과제 요건이 "GPT API 호출"이니 제출 전에 담당 교수님이나 조교에게 허용 여부를 확인하세요.**
+
+1. [Google AI Studio](https://aistudio.google.com)에서 API 키를 만듭니다
+2. `.env`를 만들 때 `--provider gemini`를 붙이고, 키와 모델 이름(AI Studio 모델 목록에 있는 이름)을 입력합니다
+
+```powershell
+python scripts\setup_env.py C:\keys\firebase-key.json --provider gemini
+python scripts\check_setup.py
+```
+
+3. Render에 배포할 때도 `OPENAI_BASE_URL`, `OPENAI_API_KEY`(제미나이 키), `OPENAI_MODEL`(제미나이 모델)을 같은 값으로 넣습니다
+4. OpenAI로 돌아가려면 `OPENAI_BASE_URL`을 비우고 키와 모델을 OpenAI 것으로 바꿉니다 (`--provider openai`)
+
 ## 환경 변수
 
 ### 백엔드 (`backend/.env`, Render)
@@ -192,6 +207,7 @@ CSV에는 89건이 있습니다. 과제 요건(100건 이상)을 채우려면 �
 | `FIREBASE_CREDENTIALS_BASE64` | ✅ | Firebase 서비스 계정 JSON 전체를 base64로 인코딩한 한 줄 |
 | `OPENAI_API_KEY` | ✅ | OpenAI API 키 |
 | `OPENAI_MODEL` | ✅ | 사용할 모델 이름 (기본값 없음) |
+| `OPENAI_BASE_URL` | | 비우면 OpenAI. 제미나이를 쓸 때만 `https://generativelanguage.googleapis.com/v1beta/openai/` |
 | `ALLOWED_ORIGINS` | 배포 때 ✅ | CORS 허용 출처, 쉼표로 구분, 끝에 `/` 없이. 비우면 `http://localhost:5500`, `http://127.0.0.1:5500`만 허용 |
 
 ### 프론트엔드 (Vercel)
@@ -229,7 +245,7 @@ git push
    - Build Command: `pip install -r requirements.txt`
    - Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
    - Instance Type: Free
-3. **Environment**에 `FIREBASE_CREDENTIALS_BASE64`, `OPENAI_API_KEY`, `OPENAI_MODEL`을 넣습니다. `ALLOWED_ORIGINS`는 5단계에서 Vercel 주소가 나온 뒤 넣습니다
+3. **Environment**에 `FIREBASE_CREDENTIALS_BASE64`, `OPENAI_API_KEY`, `OPENAI_MODEL`을 넣습니다. 제미나이를 쓰면 `OPENAI_BASE_URL`도 넣습니다. `ALLOWED_ORIGINS`는 5단계에서 Vercel 주소가 나온 뒤 넣습니다
 4. (선택) Settings → Health Check Path를 `/health`로 지정합니다
 5. 배포가 끝나면 `https://<your-api>.onrender.com/docs`가 열리는지 확인합니다
 

@@ -161,3 +161,26 @@ class NotConfiguredTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OpenAIClientConfigTests(unittest.TestCase):
+    def setUp(self):
+        chat_service.get_openai_client.cache_clear()
+
+    def tearDown(self):
+        chat_service.get_openai_client.cache_clear()
+
+    def _client(self, env):
+        import os
+        from unittest import mock
+
+        with mock.patch.dict(os.environ, env):
+            return chat_service.get_openai_client()
+
+    def test_default_is_openai(self):
+        c = self._client({"OPENAI_API_KEY": "k", "OPENAI_BASE_URL": ""})
+        self.assertIn("api.openai.com", str(c.base_url))
+
+    def test_gemini_base_url(self):
+        c = self._client({"OPENAI_API_KEY": "k", "OPENAI_BASE_URL": chat_service.GEMINI_BASE_URL})
+        self.assertEqual(str(c.base_url), chat_service.GEMINI_BASE_URL)

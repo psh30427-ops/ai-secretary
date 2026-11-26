@@ -12,6 +12,9 @@ from app.services import conversation_service, summary_service
 # 이전 대화 중 최근 몇 개 메시지를 함께 보낼지 (토큰 비용 제한)
 HISTORY_LIMIT = 20
 
+OPENAI_DEFAULT_BASE_URL = "https://api.openai.com/v1"
+GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+
 SYSTEM_PROMPT_TEMPLATE = """너는 한림대학교 학생의 학사 일정을 관리해 주는 AI 비서야.
 오늘 날짜는 {today} (Asia/Seoul)이야.
 
@@ -39,7 +42,11 @@ SYSTEM_PROMPT_TEMPLATE = """너는 한림대학교 학생의 학사 일정을 �
 def get_openai_client() -> openai.OpenAI:
     if not os.getenv("OPENAI_API_KEY"):
         raise ServiceNotConfiguredError("OPENAI_API_KEY 환경변수가 설정되지 않았습니다.")
-    return openai.OpenAI()  # OPENAI_API_KEY를 환경변수에서 읽는다.
+    # OPENAI_BASE_URL을 비우면 OpenAI, 채우면 OpenAI 호환 API(예: 제미나이)로 보낸다.
+    # openai 패키지는 OPENAI_BASE_URL이 빈 문자열이어도 그 값을 주소로 써 버리므로,
+    # 비어 있으면 OpenAI 기본 주소를 명시적으로 넘긴다.
+    base_url = os.getenv("OPENAI_BASE_URL", "").strip() or OPENAI_DEFAULT_BASE_URL
+    return openai.OpenAI(base_url=base_url)  # OPENAI_API_KEY는 환경변수에서 읽는다.
 
 
 def get_model() -> str:

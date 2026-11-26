@@ -70,6 +70,9 @@ def check_openai() -> bool:
     from app.errors import ServiceNotConfiguredError
     from app.services.chat_service import get_model, get_openai_client
 
+    base_url = os.getenv("OPENAI_BASE_URL", "").strip()
+    provider = "제미나이 호환 API" if "generativelanguage" in base_url else (base_url or "OpenAI")
+    print(f"   [정보] 연결 대상: {provider}")
     try:
         client = get_openai_client()
         model = get_model()
@@ -80,13 +83,17 @@ def check_openai() -> bool:
     except openai.AuthenticationError:
         print(f"   {FAIL} API 키가 올바르지 않습니다.")
         return False
+    except openai.BadRequestError as exc:
+        # 제미나이 호환 API는 잘못된 키에 401 대신 400을 돌려준다.
+        print(f"   {FAIL} 요청이 거부됐습니다 (키나 모델 이름 확인): {str(exc)[:200]}")
+        return False
     except openai.NotFoundError:
         print(f"   {FAIL} 모델 '{os.getenv('OPENAI_MODEL')}'을 찾을 수 없습니다. 모델 이름을 확인하세요.")
         return False
     except openai.OpenAIError as exc:
         print(f"   {FAIL} {type(exc).__name__}: {str(exc)[:200]}")
         return False
-    print(f"   {OK} 키와 모델 '{model}' 확인")
+    print(f"   {OK} 키와 모델 '{model}' 확인 ({provider})")
     return True
 
 
