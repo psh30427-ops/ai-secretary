@@ -64,7 +64,7 @@ def check_firestore() -> bool:
 
 
 def check_openai() -> bool:
-    print("3) OpenAI")
+    print("3) AI 모델 (OpenAI 형식 API: OpenAI 또는 제미나이)")
     import openai
 
     from app.errors import ServiceNotConfiguredError
@@ -104,7 +104,7 @@ def main() -> int:
 
     results = [check_env(), check_firestore()]
     if args.skip_openai:
-        print(f"3) OpenAI\n   {SKIP}")
+        print(f"3) AI 모델\n   {SKIP}")
     else:
         results.append(check_openai())
 
