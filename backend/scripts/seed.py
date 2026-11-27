@@ -15,6 +15,7 @@ sys.path.insert(0, str(BACKEND_DIR))
 
 from pydantic import ValidationError  # noqa: E402
 
+from app import config  # noqa: E402,F401  (backend/.env 로딩)
 from app.schemas.data import DataIn  # noqa: E402
 
 DEFAULT_CSV = BACKEND_DIR.parent / "data" / "smartlead_seed.csv"
